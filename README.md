@@ -126,4 +126,106 @@ sudo apt-get install -y thehive<br>_
 10. Check the status of each of these services (cassandra, elasticsearch and thehive) should be actively running
 11. Login to TheHive at **http://Your-Hive-IP:9000** using Default Credentials 'admin@thehive.local' with a password of 'secret'
 
-### Wazuh and TheHive Configuration
+### Sysmon Log Ingestion in Wazuh
+
+By default Wazuh dosen't log Symon events. To do so we need to make changes in the **ossec.conf** configuration file on Wazuh-Cleint and Wazuh-Manager.
+1. On Windows client configure Wazuh-agent to send all the sysmon related events to Wazuh-Manager **C:\Program Files (x86)\ossec-agent\ossec.conf**. After making changes restrat the Wazuh service on client.
+
+![Screenshot 2024-06-19 183502](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/bf7ae66f-a55e-4f8d-96a4-fec6abf693ab)
+
+2. On Wazuh-Manager make following changes to **/var/ossec/etc/ossec.conf**
+
+![Screenshot 2024-06-19 184457](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/baa60475-cfb8-4f53-9945-c0026bb0377c)
+
+3. On Wazuh-Manager open **/etc/filebeat/filebeat.yml**, which is a service designed to collect and forward log data to central processing and storage systems, such as Elasticsearch, Logstash, or other log management solutions and make following changes: It will send all the logs to Wazuh.
+
+![Screenshot 2024-06-19 184457](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/3a11ae6e-e2ad-4678-8ea0-28cd0b98daaf)
+
+4. Restrat the wazuh.manger and filebeat services using command: **systemctl restart wazuh-manager.service && systemctl restart filebeat**
+5. Open Wazuh Dashboard and create and select new index pattern **(Stack Management > Index Patterns > Create Index Pattern)**
+
+![Screenshot 2024-06-19 190317](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/c4646ebb-ec06-4b43-a760-fe3a826e14e0)
+![Screenshot 2024-06-19 190336](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/30a9a380-3522-4518-981f-fc6be96eaff9)
+![Screenshot 2024-06-19 190504](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/6d4ab627-b3c9-477f-b16e-9fb5ba6c2155)
+
+5. Create a custom rule to detect Mimikatz!! Locate the **local_rules.xml** file (all the custome rules are stored in this file) and add the following rule:
+
+![Screenshot 2024-06-19 191718](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/c64fae98-eb9e-4a6b-8115-5c92416f6791)
+![Screenshot 2024-06-19 191343](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/06e6b8d9-eddc-48ec-9503-f6a0b17de200)
+
+_The **OriginalFileName** field is derived from the PE (Portable Executable) header of the file. This field is particularly useful for security monitoring and incident response, as it can help identify malicious processes even if they are masquerading as legitimate system processes by using the same process name. For example, if we change the the name of a Mimikatz executable to avoid detection, the OriginalFileName field still can help reveal the process’s true identity._
+
+6. Test the rule!! To see the effectiveness of rule I already change the executable name.
+
+![Screenshot 2024-06-19 193104](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/2ae6cb8c-729e-4d1a-972c-2d335d8f0603)
+![Screenshot 2024-06-19 193155](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/741849af-a5b7-48d6-9866-fa8a27a353a4)
+
+### SOAR Implementation using Shuffle
+
+1. Create a Shuffle account and new workflow with appropriate Name, Description and Usaecase. https://shuffler.io/workflows
+2. Select the **Webhook** triggr and name it to Wazuh-Alert. Copy the Webhook URI, which is requires to integrate Shuffle with Wazuh.
+
+![Screenshot 2024-06-19 194606](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/1a149016-9957-4160-bd39-5232f4cd016a)
+
+3. Open the **/var/ossec/etc/ossec.conf** file on Wazuh-Manager and make following changes to integrate shuffle:
+
+![Screenshot 2024-06-19 193858](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/f9411bcb-e181-464c-a68c-64fc0c8ea7f6)
+
+4. Start the Webhook and run Mimikatz again to check if we get alert on Shuffle:
+
+![Screenshot 2024-06-19 195652](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/f65bfff7-cb85-4547-bea4-ac9fc497f2c1)
+
+5. We successfully got Alert on Shuffle..Next we will extract the SHA256 hash from the event data. Click on Change Me and rename it to **SHA256-regex**. Change Find Actions to **Regex Capture Group**. Input following Regex to parse hash: **SHA256=([A-F0-9]+)**. Select Input Data to point the hash values from the event field as below and save the workflow.
+
+![Screenshot 2024-06-19 200352](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/2dfa66a3-9178-4916-846a-42c70ae84ec7)
+
+6. Rerun the workflow by clicking Explore Runs to check our configuration. Looks like we got our SHA256 Hash successfully.
+
+![Screenshot 2024-06-19 200547](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/3e58cf65-f1d8-4904-ae82-53c159a26bc6)
+
+7. In the next stage we will enrich our hash using Virustotal App. For that select **Virustotal** App from the search and do following changes: You will need to paste your API key from Virustotal for authentication. If everything is configured correctly we will get a hash report from the Virustotal for our extracted hash.
+
+![Screenshot 2024-06-19 202008](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/8f0ccaf9-ae1f-4322-869a-265b78dfc1fb)
+
+8. Save and Rerun the workflow. The following Image shows the expected output if everything is configured correctly.
+
+![Screenshot 2024-06-19 202931](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/ac94933d-6145-4b00-89be-b3bf6b222709)
+
+9. Next is to configure Shuffle to create a custom alert in **TheHive** with our enriched information. For that login to TheHive web gui and creat a new organisation with 2 users: One is **Analyst** and other is **Service Account**. Copy the Service Account API key to Authenticate with Shuffle.
+
+![Screenshot 2024-06-19 203324](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/10d9894c-e127-4dbd-aa59-5fd8bf152170)
+
+10. Next, select **TheHive** application into the workflow and click + icon to setup authentication as below: _(Replace the IP address and API key)_
+
+![Screenshot 2024-06-19 204120](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/88c7c155-e831-4dfe-95c4-341401935152)
+
+11. Select the **Create Alert** under the find actions and do following changes: _(You can select and customize what information you need in alert)_
+    - Type: Alert
+    - Tlp: 2
+    - Title: Title: $exec.title
+    - Tags: ["$exec.text.win.eventdata.ruleName"] _(Require to put in array otherwise gives error)_
+    - Summary: \n* ProcessID:$exec.text.win.eventdata.processId \n* FilePath: $exec.text.win.eventdata.commandLine \n* Detected Malicious by $virustotal.#.body.data.attributes.last_analysis_stats.malicious AV
+    - Status: New
+    - Sourceref: $exec.rule_id
+    - Source: Wazuh
+    - Severity: 2
+    - Pap: 2
+    - Flag: Null
+    - Externallink: Null
+    - Description: Mimikatz Detected! \n* Host: $exec.text.win.system.computer \n* Timestamp:$exec.text.win.eventdata.utcTime \n* File_Name:$exec.text.win.eventdata.originalFileName
+
+12. Save and Rerun workflow and check if new alert is created in TheHive.. **_(Login to TheHive as a newly created Analyst user)_**
+
+![Screenshot 2024-06-19 210104](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/c7bf6cf3-f64a-459c-b16d-7b19d21b129e)
+
+13. Similarly, We will send the notification of alert via Email to Analyst with critical alert information. Select the Email App from the search and enter recipient email, subject and body. Save and Rerun the workflow and check email inbox for notification. **_(Select and customize Information to sent in body such as User or Computer name and Timestamp of event)_.**
+
+![Screenshot 2024-06-19 211058](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/6a28038d-dc39-428a-86f8-d011441f2025)
+
+
+
+
+
+
+
+ 
