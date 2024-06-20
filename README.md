@@ -32,19 +32,19 @@ The network diagram depicts a streamlined SOAR implementation using Wazuh and Sh
 3. **IOC Enrichment**: Shuffle enriches the Indicators of Compromise (IOCs) using VirusTotal.
 4. **Alert Creation**: Shuffle generates an alert and sends it to TheHive case management system with enriched information.
 5. **Notification**: Shuffle sends an email notification to the SOC Analyst about the incident with major event information.
-6. **User Input**: The SOC Analyst provide the input to perform response action via email.
+6. **User Input**: The SOC Analyst provides the input to perform response action via email.
 7. **Action Execution**: Shuffle instructs the Wazuh Manager to execute a response action, such as terminating a malicious process.
 
 This process ensures efficient and automated handling of security incidents, from detection to response.
 
 ### Wazuh and TheHive Configuration
 
-I am using **DigitalOcean** as a cloud provider to host Wazuh and TheHive. I have created two Ubuntu VMs with following specifications: 
+I am using **DigitalOcean** as a cloud provider to host Wazuh and TheHive. I have created two Ubuntu VMs with the following specifications: 
 RAM: 8GB+<br>
 HDD: 50GB+<br>
 OS: Ubuntu 22.04 LTS<br>
 
-Created firewall and added rules to allow only self-access to both VMs. 
+Created a firewall and added rules to allow only self-access to both VMs. 
 
 ![Screenshot 2024-06-18 181736](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/79a80dbb-b88b-4770-8c21-fd681362fb72)
 
@@ -52,11 +52,11 @@ Created firewall and added rules to allow only self-access to both VMs.
 _curl -sO https://packages.wazuh.com/4.7/wazuh-install.sh && sudo bash ./wazuh-install.sh -a_<br>
 _sudo tar -xvf wazuh-install-files.tar_<br>
 
-You will be presented with login credentials after installation. Use VM's public IP to login into Wazuh Dashboard. You can also find the login credentials in Wazuh-install-files directory. Next step is to deploy wazuh-agent on Windows Client.
-1. Click drop-down menu and Select Agents. You will see list of all deployed Agents. Initially you won't find any.
-2. Click Deploy New Agent and Select Windows and enter your Wazuh server IP and you will be presented with Powershell command to run on Client machine.
-3. Run command as administrator and start the wazuh-service using command _NET START WazuhSvc_
-4. Now the Agent will report to Wazuh Manager and you will see the active agents as shown in screenshot.
+You will be presented with login credentials after installation. Use the VM's public IP to log into the Wazuh Dashboard. You can also find the login credentials in Wazuh-install-files directory. The next step is to deploy wazuh-agent on Windows Client.
+1. Click the drop-down menu and Select Agents. You will see a list of all deployed Agents. Initially, you won't find any.
+2. Click Deploy New Agent, Select Windows, and enter your Wazuh server IP, and you will be presented with the Powershell command to run on the Client machine.
+3. Run the command as administrator and start the wazuh-service using the command _NET START WazuhSvc_
+4. Now the Agent will report to the Wazuh Manager, and you will see the active agents as shown in the screenshot.
 
 ![Screenshot 2024-06-18 185906](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/229e212f-6abe-4b2d-8c56-8f8e4a9c217f)
 
@@ -128,8 +128,8 @@ sudo apt-get install -y thehive<br>_
 
 ### Sysmon Log Ingestion in Wazuh
 
-By default Wazuh dosen't log Symon events. To do so we need to make changes in the **ossec.conf** configuration file on Wazuh-Cleint and Wazuh-Manager.
-1. On Windows client configure Wazuh-agent to send all the sysmon related events to Wazuh-Manager **C:\Program Files (x86)\ossec-agent\ossec.conf**. After making changes restrat the Wazuh service on client.
+By default, Wazuh doesn't log Symon events. To do so we need to make changes in the **ossec.conf** configuration file on Wazuh-Cleint and Wazuh-Manager.
+1. On Windows client configure Wazuh-agent to send all the sysmon related events to Wazuh-Manager **C:\Program Files (x86)\ossec-agent\ossec.conf**. After making changes, restart the Wazuh service on the client.
 
 ![Screenshot 2024-06-19 183502](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/bf7ae66f-a55e-4f8d-96a4-fec6abf693ab)
 
@@ -148,12 +148,12 @@ By default Wazuh dosen't log Symon events. To do so we need to make changes in t
 ![Screenshot 2024-06-19 190336](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/30a9a380-3522-4518-981f-fc6be96eaff9)
 ![Screenshot 2024-06-19 190504](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/6d4ab627-b3c9-477f-b16e-9fb5ba6c2155)
 
-5. Create a custom rule to detect Mimikatz!! Locate the **local_rules.xml** file (all the custome rules are stored in this file) and add the following rule:
+5. Create a custom rule to detect Mimikatz!! Locate the **local_rules.xml** file (all the custom rules are stored in this file) and add the following rule:
 
 ![Screenshot 2024-06-19 191718](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/c64fae98-eb9e-4a6b-8115-5c92416f6791)
 ![Screenshot 2024-06-19 191343](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/06e6b8d9-eddc-48ec-9503-f6a0b17de200)
 
-_The **OriginalFileName** field is derived from the PE (Portable Executable) header of the file. This field is particularly useful for security monitoring and incident response, as it can help identify malicious processes even if they are masquerading as legitimate system processes by using the same process name. For example, if we change the the name of a Mimikatz executable to avoid detection, the OriginalFileName field still can help reveal the process’s true identity._
+_The **OriginalFileName** field is derived from the PE (Portable Executable) header of the file. This field is particularly useful for security monitoring and incident response, as it can help identify malicious processes even if they are masquerading as legitimate system processes by using the same process name. For example, if we change the name of a Mimikatz executable to avoid detection, the OriginalFileName field can still help reveal the process’s true identity._
 
 6. Test the rule!! To see the effectiveness of rule I already change the executable name.
 
@@ -175,7 +175,7 @@ _The **OriginalFileName** field is derived from the PE (Portable Executable) hea
 
 ![Screenshot 2024-06-19 195652](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/f65bfff7-cb85-4547-bea4-ac9fc497f2c1)
 
-5. We successfully got Alert on Shuffle..Next we will extract the SHA256 hash from the event data. Click on Change Me and rename it to **SHA256-regex**. Change Find Actions to **Regex Capture Group**. Input following Regex to parse hash: **SHA256=([A-F0-9]+)**. Select Input Data to point the hash values from the event field as below and save the workflow.
+5. We successfully got Alert on Shuffle..Next, we will extract the SHA256 hash from the event data. Click on Change Me and rename it to **SHA256-regex**. Change Find Actions to **Regex Capture Group**. Input following Regex to parse hash: **SHA256=([A-F0-9]+)**. Select Input Data to point the hash values from the event field as below and save the workflow.
 
 ![Screenshot 2024-06-19 200352](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/2dfa66a3-9178-4916-846a-42c70ae84ec7)
 
@@ -218,9 +218,44 @@ _The **OriginalFileName** field is derived from the PE (Portable Executable) hea
 
 ![Screenshot 2024-06-19 210104](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/c7bf6cf3-f64a-459c-b16d-7b19d21b129e)
 
-13. Similarly, We will send the notification of alert via Email to Analyst with critical alert information. Select the Email App from the search and enter recipient email, subject and body. Save and Rerun the workflow and check email inbox for notification. **_(Select and customize Information to sent in body such as User or Computer name and Timestamp of event)_.**
+13. Similarly, we will send the alert notification via email to the analyst with critical alert information. Select the Email App from the search and enter recipient email, subject and body. Save and Rerun the workflow and check email inbox for notification. **_(Select and customize Information to sent in body such as User or Computer name and Timestamp of event)_.**
 
 ![Screenshot 2024-06-19 211058](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/6a28038d-dc39-428a-86f8-d011441f2025)
+
+14. As a final step in the lab, we will configure an active response to the kill process related to the Mimikatz application using Wazuh API in Shuffle. _**(Active response in Wazuh refers to automated actions taken in response to security events, such as blocking IP addresses or executing scripts based on predefined rules.)**_ To do so, we need to authenticate Wazuh using an API token. To get that token, we will utilize a curl command that retrieves the JWT token (JSON Web Token). This token will be used to execute an active response command from Shuffle. Select **HTTP** application from the search and paste the following curl command and make sure to replace IP address of Wazuh, username and password. All the credentials are found in the file **/root/wazuh-install-files/wazuh-passwords.txt**. The expected output is shown in the screenshot.
+    
+    - **curl -u USERNAME:PASSWORD -k -X GET "https://WAZUH-IP:55000/security/user/authenticate?raw=true"**
+
+![Screenshot 2024-06-20 163220](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/56b939d3-4f28-4593-9255-10cbb87414c3)
+
+15. Select **User Input trigger** from the search and make the following changes: It will send an email to the Analyst if He/She wants to kill the process related to MimiKatz. Based on the selected Input, Wazuh will send the active response command. 
+
+![Screenshot 2024-06-20 163803](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/ab53874c-0440-4b10-a378-f11ffe60257e)
+
+16. On Wazuh-Manager make following changes to **/var/ossec/etc/ossec.conf** for active response. By default, Wazuh provides some built-in active response commands, but we have to specify which commands or scripts should be executed when specific events occur. In our example, the active response configuration is set up to execute the **block.bat** script when rule ID 100002 is met.
+
+![Screenshot 2024-06-20 164907](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/48e51152-53bc-4414-b4d5-bbbe80b6aea8)
+
+17. Configure **Wazuh API** in Shuffle to send the active response command **(block)**. Select Wazuh app from the search and make following changes: _(Find Actions, API key, URL, Agent list, command and Arguments if any)_
+
+![image](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/90d22d22-6018-4172-8817-6ed0dc586612)
+
+18. Final workflow design and execution.
+    - Start the webhook and run Mimikatz on the Windows Client.
+    - The custom rule (100002) that we created will trigger, and an alert will be received in Shuffle.
+    - The SHA256 Hash related to Mimikatz will be parsed and fed into Virustotal.
+    - The Hash report will be generated, and a custom alert will be created into TheHive for analysts to investigate.
+    - Additionally, an email notification will be sent to the Analyst with a high-level summary of an event.
+    - The analyst will be asked to provide user input to kill the process.
+    - Based on the user input, an active response command **(block)** will be executed, and the Mimikatz-related process will be terminated.
+
+![Screenshot 2024-06-20 172947](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/b10fcbd9-81e2-464d-a9fe-b127872ce1bd)
+![Screenshot 2024-06-20 173055](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/3843e385-49e6-47a8-ba50-37dab4969782)
+![Screenshot 2024-06-20 173511](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/4e7aa866-6d2c-4da7-af4d-ae8227cd4cec)
+![Screenshot 2024-06-20 173616](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/e96bba4d-e943-4538-9ec8-908ef9f5092c)
+![Screenshot 2024-06-20 174008](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/2606f8d0-2827-46df-b892-693b9f6c0ee9)
+
+
 
 
 
