@@ -251,6 +251,7 @@ _The **OriginalFileName** field is derived from the PE (Portable Executable) hea
 
 ![Screenshot 2024-06-20 172947](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/b10fcbd9-81e2-464d-a9fe-b127872ce1bd)
 ![Screenshot 2024-06-20 173055](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/3843e385-49e6-47a8-ba50-37dab4969782)
+![Screenshot 2024-06-20 174701](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/131c6589-a525-4008-a266-f34ff9bf03f9)
 ![Screenshot 2024-06-20 173511](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/4e7aa866-6d2c-4da7-af4d-ae8227cd4cec)
 ![Screenshot 2024-06-20 173616](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/e96bba4d-e943-4538-9ec8-908ef9f5092c)
 ![Screenshot 2024-06-20 174008](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/2606f8d0-2827-46df-b892-693b9f6c0ee9)
