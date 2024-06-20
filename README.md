@@ -256,7 +256,9 @@ _The **OriginalFileName** field is derived from the PE (Portable Executable) hea
 ![Screenshot 2024-06-20 173616](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/e96bba4d-e943-4538-9ec8-908ef9f5092c)
 ![Screenshot 2024-06-20 174008](https://github.com/JP-Portfolio/SOC-Automation-Lab/assets/167912526/2606f8d0-2827-46df-b892-693b9f6c0ee9)
 
+## Conclusion
 
+This SOC automation lab project has successfully demonstrated the integration and automation capabilities of Wazuh, TheHive, and Shuffle to create a proactive and efficient security operations center. Through this project, I have honed my skills in cloud infrastructure management, security policy configuration, incident detection and analysis, threat intelligence, and automated threat response. The experience has not only reinforced my technical expertise but also emphasized the importance of continuous learning and adaptation in the ever-evolving field of cybersecurity.
 
 
 
